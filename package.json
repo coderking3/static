@@ -1,0 +1,13 @@
+{
+  "name": "static",
+  "version": "1.0.0",
+  "description": "Host for static files",
+  "author": "king3 <king3.wm@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "converter": "converter"
+  },
+  "devDependencies": {
+    "@king-3/converter-kit": "^1.3.5"
+  }
+}
