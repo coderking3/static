@@ -1,0 +1,14 @@
+{
+  "type": "crypto",
+  "algorithm": "aes-256-gcm",
+  "createdAt": "2025-12-15 16:38:05",
+  "file": {
+    "name": "npm.txt",
+    "extension": ".txt",
+    "size": 420,
+    "iv": "QwhPob5fXfrjr2XGMhIt3w==",
+    "authTag": "SncW2/kjG04CpXyKCsD2Kg==",
+    "salt": "52OoYZIYfoYx2Mf2jNwg0ENw7A79DhCCehYsoYQ1+Xw=",
+    "encrypted": "5gqL9F+pB8b5oFDMuZOgBgAJk4OxHMAhWbmBL8KigPM/tXSj9OmDvCIvg5UCw3F3Vq3Oo/C49wwpXqw3YBwAgeHuIPO1sbrY8bLo8eS+CYVuCSPPVRSzFY9JYv98oaQ676V4/AUSJNDtl9Wtp9ca3S/9CawnaOCLFvhN/suIbq1TgWLEjRDZJD4SLe/7ELgitcr8canUOq3i9HwNH3og28qUr+tRXyOApbNxT34SBbYqBx8pv+FRnUn53VkO+mgE6PV5x7n8QY0EnzwnYYQAr6Dr4TjkC8a52WvL57lbucEqok1qPnS5gxJes59mgM6e2GtZcA7Qd5aAtmkx//DzJ8G1mb80pGPS8N3GM+1chVEkMLSFMds5TOuYUNxCu12haIA+NRBk9/d76ji8tiaCI+dtxcJCzQdy9hzeX63groRcOASi0ky6WMTqstGmk+vCfym88wn28Y8NuXAE9nJTKEXpf/lmFjAJEnJxoA5PItYnievw7S472r77nKSxDF+tu9A/OchiQBY1abLKz+RTPeWpxdvRr+PfjyFZB9/opZRlaYKF"
+  }
+}
