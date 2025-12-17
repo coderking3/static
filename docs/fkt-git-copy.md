@@ -20,7 +20,8 @@ fkt restore ./gitzip.base64.json -o ./zip && \
 unzip ./zip/gitzip.zip -d ./zip && \
 rm ./gitzip.base64.json ./zip/gitzip.zip && \
 cd ./zip && \
-git checkout .
+git checkout . && \
+cd ../
 ```
 
 ---
@@ -41,7 +42,8 @@ fkt decrypt ./gitzip.crypto.json -o ./zip && \
 unzip ./zip/gitzip.zip -d ./zip && \
 rm ./gitzip.crypto.json ./zip/gitzip.zip && \
 cd ./zip && \
-git checkout .
+git checkout . && \
+cd ../
 ```
 
 ---
