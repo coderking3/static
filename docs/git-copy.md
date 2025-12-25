@@ -68,9 +68,9 @@ git fetch origin && git reset --hard origin/main
 删除 zip 文件、node_modules 和 .next 之外的所有文件和文件夹
 ```bash
 # 预览删除文件
-setopt extended_glob && ls -d ^(zip|node_modules|.next)
+setopt extended_glob && ls -d ^(.git|zip|node_modules|.next)
 # 删除命令
-setopt extended_glob && rm -rf ^(zip|node_modules|.next)
+setopt extended_glob && rm -rf ^(.git|zip|node_modules|.next)
 ```
 
 ⚠️ 注意
