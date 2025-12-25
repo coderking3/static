@@ -61,3 +61,16 @@ cd ../
 ```bash
 git fetch origin && git reset --hard origin/main
 ```
+
+
+## 清理工作目录
+
+删除 zip 文件、node_modules 和 .next 之外的所有文件和文件夹
+```bash
+shopt -s extglob && rm -rf !(*.zip|node_modules|.next)
+```
+
+⚠️ 注意
+- 此命令会永久删除匹配的文件和文件夹,无法恢复
+- 执行前请确认当前目录位置
+- 建议先用 ls -d !(*.zip|node_modules|.next) 预览将被删除的内容
