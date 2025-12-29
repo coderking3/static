@@ -40,7 +40,7 @@ setopt extended_glob && rm -rf ^(.git|zip|node_modules|.next)
 
 **迁移 zip 内容到根目录** (排除 .git)
 ```bash
-setopt extended_glob && cp -r zip/^(.git) ./ && rm -rf zip/
+setopt extended_glob && cp -r zip/^(.git)/ ./ && rm -rf zip/
 ```
 
 ⚠️ **删除操作不可恢复,请先预览确认**
