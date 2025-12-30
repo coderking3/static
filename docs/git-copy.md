@@ -43,4 +43,11 @@ setopt extended_glob && rm -rf ^(.git|zip|node_modules|.next)
 setopt extended_glob && cp -r zip/^(.git)/ ./ && rm -rf zip/
 ```
 
+
+
+**重置git提交**
+```bash
+rm -rf .git && git init && git add . && git commit -m 'temp'
+```
+
 ⚠️ **删除操作不可恢复,请先预览确认**
