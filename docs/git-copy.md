@@ -35,7 +35,7 @@ git fetch origin && git reset --hard origin/main
 
 **清理工作目录** (保留 .git、zip、node_modules、.next)
 ```bash
-setopt extended_glob && rm -rf ^(.git|zip|node_modules|.next)
+setopt extended_glob glob_dots && rm -rf ^(.git|zip|node_modules|.next)
 ```
 
 **迁移 zip 内容到根目录** (排除 .git)
