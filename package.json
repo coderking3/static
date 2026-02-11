@@ -1,6 +1,6 @@
 {
   "name": "static",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Host for static files",
   "author": "king3 <king3.wm@gmail.com>",
   "license": "Apache-2.0",
