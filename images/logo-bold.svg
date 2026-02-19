@@ -1,0 +1,14 @@
+<svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-bold">
+  <!-- Divider -->
+  <path d="M7.5 12.72H16.5" stroke="currentColor" stroke-width="2" class="divider"/>
+  
+  <!-- ArrowUp -->
+  <path fill-rule="evenodd" clip-rule="evenodd"
+    d="M2.8 3.5H3.5L11.3418 18.5L12.0044 19.8L12.667 18.5L20.509 3.5H21.209H22.6L21.95 4.75L12.85 22H11.159L2.059 4.75L1.409 3.5H2.8Z"
+    fill="currentColor" class="arrow-up" />
+  
+  <!-- ArrowDown -->
+  <path fill-rule="evenodd" clip-rule="evenodd"
+    d="M11.159 3.5L2.059 20.75L1.409 22H2.8H3.5L11.3418 7L12.0044 5.7L12.667 7L20.509 22H21.209H22.6L21.95 20.75L12.85 3.5H11.159Z"
+    fill="currentColor" class="arrow-down"/>
+</svg>
