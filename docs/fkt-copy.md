@@ -34,14 +34,14 @@ fkt restore .\gitzip.base64.txt -o .\zip; Expand-Archive -Path .\zip\gitzip.zip 
 git fetch origin && git reset --hard origin/main
 ```
 
-**清理工作目录** (保留 .git、zip、node_modules、.next、.env)
+**清理工作目录** (保留 .git、zip、node_modules、.next、.env、.env.local)
 
 ```bash
-setopt extended_glob glob_dots && rm -rf ^(.git|zip|node_modules|.next|.env)
+setopt extended_glob glob_dots && rm -rf ^(.git|zip|node_modules|.next|.env|.env.local)
 ```
 
 ```powershell
-Get-ChildItem -Force | Where-Object { $_.Name -notin @('.git','zip','node_modules','.next','.env') } | Remove-Item -Recurse -Force
+Get-ChildItem -Force | Where-Object { $_.Name -notin @('.git','zip','node_modules','.next','.env','.env.local') } | Remove-Item -Recurse -Force
 ```
 
 **迁移 zip 内容到根目录** (排除 .git)
