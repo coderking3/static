@@ -76,7 +76,8 @@ rm -rf .git && \
   cd "$(git rev-parse --show-toplevel)" && \
   zip -r gitzip.zip ./.git && \
   fkt base64 gitzip.zip -o . && \
-  rm gitzip.zip
+  rm gitzip.zip && \
+  clear
 ```
 
 ```powershell
@@ -88,6 +89,7 @@ cd $(git rev-parse --show-toplevel)
 Compress-Archive -Path .\.git -DestinationPath gitzip.zip -Force
 fkt base64 gitzip.zip -o .
 Remove-Item gitzip.zip
+clear
 ```
 
 **还原并替换目录**
