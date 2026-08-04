@@ -102,7 +102,8 @@ fkt restore ./gitzip.base64.txt -o ./zip && \
   setopt extended_glob glob_dots && \
   rm -rf ^(.git|zip|node_modules|.next|.env|.env.local) && \
   cp -r zip/^.git ./ && \
-  rm -rf zip/
+  rm -rf zip/ && \
+  clear
 ```
 
 ```powershell
@@ -119,6 +120,7 @@ Get-ChildItem .\zip\ -Force |
   Where-Object { $_.Name -ne '.git' } |
   Copy-Item -Destination .\ -Recurse -Force
 Remove-Item .\zip\ -Recurse -Force
+clear
 ```
 
 ⚠️ **删除操作不可恢复,请先预览确认**
