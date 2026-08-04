@@ -1,0 +1,350 @@
+import type { Certificate } from '@/types'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import {
+  CheckCircle2,
+  KeyRound,
+  Loader2,
+  QrCode,
+  RefreshCw
+} from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
+import { useEffect, useRef, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+import { generateQrcode, pollQrcode, verifyCertificate } from '@/api/login'
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  Input,
+  Tabs,
+  TabsList,
+  TabsTrigger
+} from '@/components/ui'
+
+type QrStatus = 'loading' | 'pending' | 'scanned' | 'expired' | 'success'
+type LoginTab = 'qrcode' | 'certificate'
+
+interface LoginModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSuccess?: (certificate: Certificate) => void
+}
+
+function extractCredentialsFromUrl(url: string): Certificate | null {
+  try {
+    const params = new URL(url).searchParams
+    const SESSDATA = params.get('SESSDATA')
+    const bili_jct = params.get('bili_jct')
+    return SESSDATA && bili_jct ? { SESSDATA, bili_jct } : null
+  } catch {
+    return null
+  }
+}
+
+// ==================== 扫码登录面板 ====================
+function QrcodePanel({ onSuccess }: { onSuccess?: (c: Certificate) => void }) {
+  const [qrcodeKey, setQrcodeKey] = useState<string | null>(null)
+  const [qrUrl, setQrUrl] = useState('')
+  const [status, setStatus] = useState<QrStatus>('loading')
+  const startedAtRef = useRef(0)
+
+  const generateMutation = useMutation({
+    mutationFn: generateQrcode,
+    onSuccess: (res) => {
+      if (res.code === 0) {
+        setQrUrl(res.data.url)
+        setQrcodeKey(res.data.qrcode_key)
+        startedAtRef.current = Date.now()
+        setStatus('pending')
+      } else {
+        setStatus('expired')
+      }
+    },
+    onError: () => setStatus('expired')
+  })
+
+  const pollQuery = useQuery({
+    queryKey: ['qrcode-poll', qrcodeKey],
+    queryFn: () => pollQrcode(qrcodeKey as string),
+    enabled: !!qrcodeKey && (status === 'pending' || status === 'scanned'),
+    refetchInterval: 2000
+  })
+
+  useEffect(() => {
+    generateMutation.mutate()
+    // eslint-disable-next-line react/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    const res = pollQuery.data
+    if (!res) return
+
+    if (Date.now() - startedAtRef.current > 180_000) {
+      setStatus('expired')
+      return
+    }
+
+    switch (res.data.code) {
+      case 0: {
+        const cert = res.data.url
+          ? extractCredentialsFromUrl(res.data.url)
+          : null
+        if (cert) {
+          setStatus('success')
+          onSuccess?.(cert)
+        } else {
+          setStatus('expired')
+        }
+        break
+      }
+      case 86038:
+        setStatus('expired')
+        break
+      case 86090:
+        setStatus('scanned')
+        break
+      case 86101:
+        setStatus('pending')
+        break
+    }
+  }, [pollQuery.data, onSuccess])
+
+  const handleRefresh = () => {
+    setQrcodeKey(null)
+    setStatus('loading')
+    generateMutation.mutate()
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-4.5 py-5">
+      <div className="relative flex size-45 items-center justify-center overflow-hidden rounded-lg border border-[#222] bg-white p-3">
+        {status === 'loading' && (
+          <Loader2 className="size-8 animate-spin text-[#686868]" />
+        )}
+
+        {status !== 'loading' && qrUrl && (
+          <QRCodeSVG value={qrUrl} size={200} level="H" className="size-full" />
+        )}
+
+        {status === 'scanned' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/85">
+            <CheckCircle2 className="size-8 text-[#adff02]" />
+            <span className="text-caption text-chalk">
+              扫描成功，请在手机上确认
+            </span>
+          </div>
+        )}
+
+        {status === 'expired' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 bg-black/85">
+            <span className="text-caption text-[#a3a3a3]">二维码已过期</span>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="flex items-center gap-1.5 rounded-full bg-[#e7c59a] px-3.5 py-1.5 text-caption font-medium text-[#0d0d0d] transition-opacity hover:opacity-90"
+            >
+              <RefreshCw className="size-3.5" />
+              刷新二维码
+            </button>
+          </div>
+        )}
+
+        {status === 'success' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/85">
+            <CheckCircle2 className="size-8 text-[#adff02]" />
+            <span className="text-caption text-chalk">登录成功</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col items-center gap-1">
+        <div className="flex items-center gap-1.5 text-[14px] text-[#a3a3a3]">
+          <QrCode className="size-4" />
+          {status === 'loading' && '正在生成二维码...'}
+          {status === 'pending' && '请使用手机 B 站 APP 扫码登录'}
+          {status === 'scanned' && '等待手机确认...'}
+          {status === 'expired' && '二维码已失效，请刷新'}
+          {status === 'success' && '即将自动关闭'}
+        </div>
+        <span className="text-[12px] text-[#686868]">二维码有效期 3 分钟</span>
+      </div>
+    </div>
+  )
+}
+
+// ==================== 手动填入凭证面板 ====================
+const certificateSchema = z.object({
+  SESSDATA: z.string().min(1, { message: 'SESSDATA 不能为空' }),
+  bili_jct: z.string().min(1, { message: 'bili_jct 不能为空' })
+})
+
+function CertificatePanel({
+  onSuccess
+}: {
+  onSuccess?: (c: Certificate) => void
+}) {
+  const { control, handleSubmit, setError } = useForm<
+    z.infer<typeof certificateSchema>
+  >({
+    defaultValues: { SESSDATA: '', bili_jct: '' },
+    resolver: zodResolver(certificateSchema)
+  })
+
+  const verifyMutation = useMutation({
+    mutationFn: verifyCertificate,
+    onSuccess: (res, variables) => {
+      if (res.code === 0) {
+        onSuccess?.(variables)
+      } else {
+        setError('SESSDATA', { message: '凭证无效，请检查后重试' })
+      }
+    },
+    onError: () => {
+      setError('SESSDATA', { message: '验证失败，请稍后重试' })
+    }
+  })
+
+  return (
+    <div className="flex flex-col gap-5 py-5">
+      <form
+        id="certificate-form"
+        onSubmit={handleSubmit((data) => verifyMutation.mutate(data))}
+      >
+        <FieldGroup>
+          <Controller
+            name="SESSDATA"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel
+                  htmlFor={field.name}
+                  className="text-caption text-[#a3a3a3]"
+                >
+                  SESSDATA
+                </FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  aria-invalid={fieldState.invalid}
+                  placeholder="请输入 SESSDATA"
+                  className="border-[#222] bg-transparent text-chalk placeholder:text-[#686868]"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="bili_jct"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel
+                  htmlFor={field.name}
+                  className="text-caption text-[#a3a3a3]"
+                >
+                  bili_jct
+                </FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  aria-invalid={fieldState.invalid}
+                  placeholder="请输入 bili_jct"
+                  className="border-[#222] bg-transparent text-chalk placeholder:text-[#686868]"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </FieldGroup>
+      </form>
+
+      <Button
+        type="submit"
+        form="certificate-form"
+        disabled={verifyMutation.isPending}
+        className="w-full bg-[#e7c59a] text-[#0d0d0d] hover:opacity-90"
+      >
+        {verifyMutation.isPending && (
+          <Loader2 className="size-4 animate-spin" />
+        )}
+        保存凭证
+      </Button>
+
+      <div className="flex flex-col gap-1 border-t border-[#1a1a1a] pt-3.75 text-[12.5px] leading-heading-xs text-[#686868]">
+        <span>1. 登录 B 站网页版</span>
+        <span>2. 按 F12 打开开发者工具</span>
+        <span>3. Application / Storage 标签下找到 Cookies</span>
+        <span>4. 复制 SESSDATA 和 bili_jct 的值</span>
+      </div>
+    </div>
+  )
+}
+
+// ==================== 主弹窗 ====================
+export function LoginModal({ open, onOpenChange, onSuccess }: LoginModalProps) {
+  const [tab, setTab] = useState<LoginTab>('qrcode')
+
+  const handleSuccess = (cert: Certificate) => {
+    onSuccess?.(cert)
+    setTimeout(onOpenChange, 1200, false)
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) setTab('qrcode')
+        onOpenChange(next)
+      }}
+    >
+      <DialogContent className="max-w-90 border-[#222] bg-[#0d0d0d] text-chalk">
+        <DialogHeader>
+          <DialogTitle className="text-center font-mono text-[19px] font-normal text-chalk">
+            登录
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            使用二维码扫码登录，或手动填入登录凭证
+          </DialogDescription>
+        </DialogHeader>
+
+        <Tabs value={tab} onValueChange={(v) => setTab(v as LoginTab)}>
+          <TabsList className="grid w-full grid-cols-2 bg-[#161616]">
+            <TabsTrigger value="qrcode" className="flex items-center gap-1.5">
+              <QrCode className="size-3.75" />
+              扫码登录
+            </TabsTrigger>
+            <TabsTrigger
+              value="certificate"
+              className="flex items-center gap-1.5"
+            >
+              <KeyRound className="size-3.75" />
+              手动填入
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {tab === 'qrcode' ? (
+          <QrcodePanel onSuccess={handleSuccess} />
+        ) : (
+          <CertificatePanel onSuccess={handleSuccess} />
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
