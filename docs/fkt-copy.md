@@ -64,4 +64,61 @@ rm -rf .git && git init && git add . && git commit -m 'temp'
 Remove-Item .\.git -Recurse -Force; git init; git add .; git commit -m 'temp'
 ```
 
+## 🫳 自动操作
+
+**重置提交并编码**
+
+```bash
+rm -rf .git && \
+  git init && \
+  git add . && \
+  git commit -m 'temp' && \
+  cd "$(git rev-parse --show-toplevel)" && \
+  zip -r gitzip.zip ./.git && \
+  fkt base64 gitzip.zip -o . && \
+  rm gitzip.zip
+```
+
+```powershell
+Remove-Item .\.git -Recurse -Force
+git init
+git add .
+git commit -m 'temp'
+cd $(git rev-parse --show-toplevel)
+Compress-Archive -Path .\.git -DestinationPath gitzip.zip -Force
+fkt base64 gitzip.zip -o .
+Remove-Item gitzip.zip
+```
+
+**还原并替换目录**
+
+```bash
+fkt restore ./gitzip.base64.txt -o ./zip && \
+  unzip ./zip/gitzip.zip -d ./zip && \
+  rm ./gitzip.base64.txt ./zip/gitzip.zip && \
+  cd ./zip && \
+  git checkout . && \
+  cd ../ && \
+  setopt extended_glob glob_dots && \
+  rm -rf ^(.git|zip|node_modules|.next|.env|.env.local) && \
+  cp -r zip/^.git ./ && \
+  rm -rf zip/
+```
+
+```powershell
+fkt restore .\gitzip.base64.txt -o .\zip
+Expand-Archive -Path .\zip\gitzip.zip -DestinationPath .\zip -Force
+Remove-Item .\gitzip.base64.txt, .\zip\gitzip.zip
+cd .\zip
+git checkout .
+cd ..
+Get-ChildItem -Force |
+  Where-Object { $_.Name -notin @('.git','zip','node_modules','.next','.env','.env.local') } |
+  Remove-Item -Recurse -Force
+Get-ChildItem .\zip\ -Force |
+  Where-Object { $_.Name -ne '.git' } |
+  Copy-Item -Destination .\ -Recurse -Force
+Remove-Item .\zip\ -Recurse -Force
+```
+
 ⚠️ **删除操作不可恢复,请先预览确认**
