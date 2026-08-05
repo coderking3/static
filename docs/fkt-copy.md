@@ -125,4 +125,10 @@ Remove-Item .\zip\ -Recurse -Force
 clear
 ```
 
+**替换git**
+
+```bash
+test -d "xxx/.git" && rm -rf -- "./.git" && mv -- "xxx/.git" "./.git"
+```
+
 ⚠️ **删除操作不可恢复,请先预览确认**
